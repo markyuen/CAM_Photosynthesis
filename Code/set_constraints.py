@@ -2,7 +2,7 @@ import scobra
 from cobra import Reaction
 from six import iteritems
 
-m = scobra.Model("Final_Files/Phased_Model_FINAL.xls")
+m = scobra.Model("../Final_Files/Phased_Model_FINAL.xls")
 
 m.SetReacsFixedRatio({"RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p1_phase1":3, "RXN_961_p1_phase1":1})
 m.SetReacsFixedRatio({"RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p1_phase2":3, "RXN_961_p1_phase2":1})

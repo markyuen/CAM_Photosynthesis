@@ -13,7 +13,7 @@ pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', -1)  # or 199
 pd.set_option('display.width', 1000)
 
-m = scobra.Model("Final_Files/Constrained_Model_FINAL.xls")
+m = scobra.Model("../Final_Files/Constrained_Model_FINAL.xls")
 
 '''  For writing solutions to Excel file  '''
 def WriteSolution(file_name):

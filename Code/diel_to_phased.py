@@ -1,6 +1,6 @@
 import scobra
 
-m = scobra.Model("Final_Files/diel_model.xls")
+m = scobra.Model("../Final_Files/diel_model.xls")
 
 """ Also new """
 m.DelReactions(["HEXOKINASE_RXN_MANNOSE_c1","HEXOKINASE_RXN_MANNOSE_c2"])
