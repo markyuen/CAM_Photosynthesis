@@ -4,9 +4,7 @@ from xlwt import Workbook
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from __builtin__ import True
 import ast
-import platform
 
 pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
@@ -188,34 +186,30 @@ def HourlyIntervals(df):
     
     return hourlydf
 
-objectives = [0, 
-              0, 
-              0, 
-              0, 
-              -15000]
+objectives = [1, 
+              2, 
+              4, 
+              2, 
+              -3171]
 
 m.SetObjective({'CO2_tx1_phase1': objectives[0], 
-                "CO2_tx1_phase1_reverse": objectives[0], 
+#                 "CO2_tx1_phase1_reverse": objectives[0], 
                 'CO2_tx1_phase2': objectives[1], 
-                'CO2_tx1_phase2_reverse': objectives[1], 
+#                 'CO2_tx1_phase2_reverse': objectives[1], 
                 "CO2_tx1_phase3": objectives[2], 
-                "CO2_tx1_phase3_reverse": objectives[2], 
-                "CO2_tx1_phase4": objectives[3], 
-                "CO2_tx1_phase4_reverse": objectives[3]})
+#                 "CO2_tx1_phase3_reverse": objectives[2], 
+                "CO2_tx1_phase4": objectives[3]})
+#                 "CO2_tx1_phase4_reverse": objectives[3]})
 
 m.SetObjective ({"phloem_biomass": objectives[4]})
 
 m.SetObjDirec("Min")
 m.MinFluxSolve()
 print m.GetObjective()
-print m.GetObjVal()
 m.PrintSol(f='CO2_tx',IncZeroes=False)
-''' phloem_biomass sol = 0.960396 / unit || 48 units = phleom_biomass sol * 46.1  '''
 m.PrintSol(f='phloem_biomass',IncZeroes=True)
-m.PrintSol(f='Photon_tx',IncZeroes=True)
 
-
-DisplaySolution(filters=["link","tx","X_Phloem","RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p1_phase","phase"])
+DisplaySolution(filters=["link","tx","X_Phloem","RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p1_phase", "RXN_961_p"])
 
 '''
 book = Workbook()
@@ -228,7 +222,7 @@ s1.write(4,0,str(m.GetSol(f='Photon_tx',IncZeroes=True)))
 
 sheet = [2,3]
 
-sheet[0] = book.add_sheet("1-1.5-2-1.5")
+sheet[0] = book.add_sheet("1-5-5-5")
 sheet[1] = book.add_sheet("1-2-4-2")
 
 column_names = ["phloem_biomass Obj", "phloem_biomass Sol", "CO2_tx1 Sol", "CO2_tx2 Sol", "CO2_tx3 Sol", "CO2_tx4 Sol", "ObjVal","phloem_output1 Sol","phloem_output2 Sol","phloem_output3 Sol","phloem_output4 Sol", "phloem_output Sum", "O2_tx1 Sol", "O2_tx2 Sol", "O2_tx3 Sol", "O2_tx4 Sol", "O2_tx Sum"]
@@ -237,10 +231,10 @@ for i in range(len(sheet)):
     for j in range(len(column_names)):
         sheet[i].write(0,j,column_names[j])
 
-for i in range(0,8000):
-    m.SetObjective({"phloem_biomass": -1 * i})
+for i in range(0,101):
+    m.SetObjective({"phloem_biomass": -i * 50})
     m.SetObjDirec("Min")
-    m.Solve()
+    m.MinFluxSolve()
     
     phloembiomasssum = ast.literal_eval(str(m.GetSol(f = "phloem_biomass",IncZeroes=True)))
     phloembiomasssum = sum(phloembiomasssum.itervalues())
@@ -294,95 +288,12 @@ for i in range(0,8000):
     sheet[0].write(i+1,16,ox1 + ox2 + ox3 + ox4)
     
     print i
-    if i == 3015:
-        book.save("ggg.xls")
-    elif i == 6000:
-        book.save("hhh.xls")
 
 book.save("testfirst.xls")
-'''
-
-
-
-
-
 
 '''
-objectives = [1, 
-              2, 
-              4, 
-              2, 
-              -2000]
 
-m.SetObjective({'CO2_tx1_phase1': objectives[0], 
-                "CO2_tx1_phase1_reverse": objectives[0], 
-                'CO2_tx1_phase2': objectives[1], 
-                'CO2_tx1_phase2_reverse': objectives[1], 
-                "CO2_tx1_phase3": objectives[2], 
-                "CO2_tx1_phase3_reverse": objectives[2], 
-                "CO2_tx1_phase4": objectives[3], 
-                "CO2_tx1_phase4_reverse": objectives[3]})
 
-for i in range(8000):
-    m.SetObjective({"phloem_biomass": -1 * i})
-    m.SetObjDirec("Min")
-    m.Solve()
-    
-    phloembiomasssum = ast.literal_eval(str(m.GetSol(f = "phloem_biomass",IncZeroes=True)))
-    phloembiomasssum = sum(phloembiomasssum.itervalues())
-    phase1sum = ast.literal_eval(str(m.GetSol(f = "CO2_tx1_phase1",IncZeroes=True)))
-    phase1sum["CO2_tx1_phase1_reverse"] = -phase1sum["CO2_tx1_phase1_reverse"]
-    phase1sum = sum(phase1sum.itervalues())
-    phase2sum = ast.literal_eval(str(m.GetSol(f = "CO2_tx1_phase2",IncZeroes=True)))
-    phase2sum["CO2_tx1_phase2_reverse"] = -phase2sum["CO2_tx1_phase2_reverse"]
-    phase2sum = sum(phase2sum.itervalues())
-    phase3sum = ast.literal_eval(str(m.GetSol(f = "CO2_tx1_phase3",IncZeroes=True)))
-    phase3sum["CO2_tx1_phase3_reverse"] = -phase3sum["CO2_tx1_phase3_reverse"]
-    phase3sum = sum(phase3sum.itervalues())
-    phase4sum = ast.literal_eval(str(m.GetSol(f = "CO2_tx1_phase4",IncZeroes=True)))
-    phase4sum["CO2_tx1_phase4_reverse"] = -phase4sum["CO2_tx1_phase4_reverse"]
-    phase4sum = sum(phase4sum.itervalues())
-    
-    phloem1 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx_phase1",IncZeroes=True)))
-    phloem1 = sum(phloem1.itervalues())
-    phloem2 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx_phase2",IncZeroes=True)))
-    phloem2 = sum(phloem2.itervalues())
-    phloem3 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx_phase3",IncZeroes=True)))
-    phloem3 = sum(phloem3.itervalues())
-    phloem4 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx_phase4",IncZeroes=True)))
-    phloem4 = sum(phloem4.itervalues())
-    
-    ox1 = ast.literal_eval(str(m.GetSol(f = "O2_tx_phase1",IncZeroes=True)))
-    ox1 = sum(ox1.itervalues())
-    ox2 = ast.literal_eval(str(m.GetSol(f = "O2_tx_phase2",IncZeroes=True)))
-    ox2 = sum(ox2.itervalues())
-    ox3 = ast.literal_eval(str(m.GetSol(f = "O2_tx_phase3",IncZeroes=True)))
-    ox3 = sum(ox3.itervalues())
-    ox4 = ast.literal_eval(str(m.GetSol(f = "O2_tx_phase4",IncZeroes=True)))
-    ox4 = sum(ox4.itervalues())
-    
-    sheet[1].write(i+1,0,m.GetObjective(IncZeroes=True)["phloem_biomass"])
-    sheet[1].write(i+1,1,phloembiomasssum)
-    sheet[1].write(i+1,2,phase1sum)
-    sheet[1].write(i+1,3,phase2sum)
-    sheet[1].write(i+1,4,phase3sum)
-    sheet[1].write(i+1,5,phase4sum)
-    sheet[1].write(i+1,6,m.GetObjVal())
-    sheet[1].write(i+1,7,phloem1)
-    sheet[1].write(i+1,8,phloem2)
-    sheet[1].write(i+1,9,phloem3)
-    sheet[1].write(i+1,10,phloem4)
-    sheet[1].write(i+1,11,phloem1 + phloem2 + phloem3 + phloem4)
-    sheet[1].write(i+1,12,ox1)
-    sheet[1].write(i+1,13,ox2)
-    sheet[1].write(i+1,14,ox3)
-    sheet[1].write(i+1,15,ox4)
-    sheet[1].write(i+1,16,ox1 + ox2 + ox3 + ox4)
-    
-    print("2 - " + str(i))
-
-book.save("test.xls")
-'''
 '''  Testing different objectives for CO2_tx1_phase1 and phloem_biomass  
 book = Workbook()
 s1 = book.add_sheet("First")
