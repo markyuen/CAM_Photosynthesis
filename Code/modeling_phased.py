@@ -10,7 +10,7 @@ pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', None)  # or 199
 pd.set_option('display.width', 1000)
 
-m = scobra.Model("../Final_Files/Constrained_Model_FINAL.xls")
+m = scobra.Model("../Final_Files/Constrained_Model_FINAL.json")
 
 '''  For writing solutions to Excel file  '''
 def WriteSolution(file_name):
@@ -186,10 +186,10 @@ def HourlyIntervals(df):
     return hourlydf
 
 objectives = [1, 
-              1, 
-              1, 
-              1, 
-              -706]
+              2, 
+              4, 
+              2, 
+              -3192]
 
 m.SetObjective({'CO2_tx1_phase1': objectives[0], 
                 'CO2_tx1_phase2': objectives[1], 
@@ -208,7 +208,7 @@ m.PrintSol(f='CO2_tx',IncZeroes=False)
 m.PrintSol(f='phloem_biomass',IncZeroes=True)
 DisplaySolution(filters=["link","tx","X_Phloem","RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p1_phase", "RXN_961_p"])
 
-
+'''
 book = Workbook()
 s1 = book.add_sheet("First")
 s1.write(0,0,str(m.GetObjective()))
@@ -234,7 +234,7 @@ for i in range(0, 2500):
     m.MinFluxSolve()
     
     if m.GetStatusMsg() == "no solution":
-        pass
+        print("HHHHHHHHHH")
     else:
     
         phloembiomasssum = ast.literal_eval(str(m.GetSol(f = "phloem_biomass",IncZeroes=True)))
@@ -292,9 +292,8 @@ for i in range(0, 2500):
     print(i)
     print(m.GetStatusMsg())
 
-book.save("part1.xls")
-
-
+book.save("1111.xls")
+'''
 
 
 

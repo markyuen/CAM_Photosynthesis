@@ -96,7 +96,7 @@ def SplitReactions(reacs_to_split):
 
 SplitReactions(["CO2_tx1_phase1","CO2_tx1_phase2","CO2_tx1_phase3","CO2_tx1_phase4"])
 
-m.WriteModel("Constrained_Model_FINAL.xls")
+m.WriteModel("../Final_Files/Constrained_Model_FINAL.json")
 
 
 
