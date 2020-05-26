@@ -1,4 +1,4 @@
-import scobra, sys, correlations
+import scobra, sys, modeling_phased
 from xlwt import Workbook
 
 def write(m, CO2_obj, phloem_obj, filters):
@@ -8,7 +8,7 @@ def write(m, CO2_obj, phloem_obj, filters):
     m.SetObjective({"phloem_biomass": -phloem_obj})
     m.SetObjDirec("Min")
     m.MinFluxSolve()
-    df = correlations.create_df_from_sol(m, filters)
+    df = modeling_phased.create_df_from_sol(m, filters)
     labels = [l for l in df.index.values]
     labelslen = len(labels)
     
@@ -27,7 +27,7 @@ def write(m, CO2_obj, phloem_obj, filters):
     sheets[0].write(6,0,"Reactions included: {}".format(labels))
     
     ''' Populating second sheet '''
-    first_column_names = ["CO2 Weight Multiplier", "phloem_biomass Sol", "CO2_tx1 Sol", "CO2_tx2 Sol", "CO2_tx3 Sol", "CO2_tx4 Sol", "ObjVal"]
+    first_column_names = ["CO2 Weight Multiplier", "phloem_biomass", "CO2_tx1", "CO2_tx2", "CO2_tx3", "CO2_tx4", "ObjVal"]
     column_names = first_column_names + labels
     for j in range(len(column_names)):
         sheets[1].write(0,j,column_names[j])
@@ -68,7 +68,7 @@ def write(m, CO2_obj, phloem_obj, filters):
             sheets[1].write(i+1,5,phase4sum)
             sheets[1].write(i+1,6,m.GetObjVal())
             
-            df = correlations.create_df_from_sol(m, filters)
+            df = modeling_phased.create_df_from_sol(m, filters)
             fluxes = {l: df.loc[l].tolist() for l in labels}
             for j in range(labelslen):
                 flux = [round(f, 5) for f in fluxes[labels[j]]]
