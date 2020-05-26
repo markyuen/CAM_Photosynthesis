@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import ast
+import csv
 
 pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000
@@ -81,7 +82,7 @@ def WriteSolution(file_name):
     
     book.save(file_name)
 
-'''  For displaying some solutions  '''
+'''  For displaying some solutions | filters = ["link", "phase"] for all solutions less phloem_biomass '''
 def DisplaySolution(filters, flux_min=0):
     rtp = []
     for f in filters:
@@ -89,6 +90,7 @@ def DisplaySolution(filters, flux_min=0):
             rtp.append(x)
     
     sol = m.GetSol(IncZeroes = True, AsMtx = True, reacs = rtp)
+    #print(sol)
     
     df = pd.DataFrame(sol)
     
@@ -185,11 +187,22 @@ def HourlyIntervals(df):
     
     return hourlydf
 
+import objective_scan, correlations
+
+with open("../Final_Files/Reacs to Examine.csv") as csvfile:
+    reader = csv.reader(csvfile)
+    next(reader)
+    reacs = [l[0] for l in reader]
+csvfile.close()
+
+objective_scan.write(m, [1,2,4,2], 1000, reacs)
+#print(correlations.corr(m, [1,2,4,2], 7000))
+
 objectives = [1, 
               2, 
               4, 
               2, 
-              -3192]
+              -1000]
 
 m.SetObjective({'CO2_tx1_phase1': objectives[0], 
                 'CO2_tx1_phase2': objectives[1], 
@@ -199,14 +212,17 @@ m.SetObjective({'CO2_tx1_phase1': objectives[0],
 m.SetObjective ({"phloem_biomass": objectives[4]})
 m.SetObjDirec("Min")
 m.MinFluxSolve()
- 
+
 print(m.GetStatusMsg())
 print(m.GetObjective())
 print(m.GetObjVal())
 
 m.PrintSol(f='CO2_tx',IncZeroes=False)
 m.PrintSol(f='phloem_biomass',IncZeroes=True)
-DisplaySolution(filters=["link","tx","X_Phloem","RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p1_phase", "RXN_961_p"])
+DisplaySolution(filters=["link","tx","RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p1_phase", "RXN_961_p", "PEP"])
+
+h = m.GetSol(f = "CO2_tx1_phase1",IncZeroes=True)
+print(h)
 
 '''
 book = Workbook()
@@ -217,10 +233,9 @@ s1.write(2,0,str(m.GetSol(f='CO2_tx',IncZeroes=True)))
 s1.write(3,0,str(m.GetSol(f='phloem_biomass',IncZeroes=True)))
 s1.write(4,0,str(m.GetSol(f='Photon_tx',IncZeroes=True)))
 
-sheet = [2,3]
+sheet = [2]
 
-sheet[0] = book.add_sheet("1-1-1-1")
-sheet[1] = book.add_sheet("1-2-4-2")
+sheet[0] = book.add_sheet("1-2-4-2")
 
 column_names = ["phloem_biomass Obj", "phloem_biomass Sol", "CO2_tx1 Sol", "CO2_tx2 Sol", "CO2_tx3 Sol", "CO2_tx4 Sol", "ObjVal","phloem_output1 Sol","phloem_output2 Sol","phloem_output3 Sol","phloem_output4 Sol", "phloem_output Sum", "O2_tx1 Sol", "O2_tx2 Sol", "O2_tx3 Sol", "O2_tx4 Sol", "O2_tx Sum"]
 
@@ -228,8 +243,14 @@ for i in range(len(sheet)):
     for j in range(len(column_names)):
         sheet[i].write(0,j,column_names[j])
 
-for i in range(0, 2500):
-    m.SetObjective({"phloem_biomass": i * -1})
+for i in range(0, 100):
+    
+    objectives = [x * i / 100 for x in [1,2,4,2]]
+    print(objectives)
+    m.SetObjective({'CO2_tx1_phase1': objectives[0], 
+                'CO2_tx1_phase2': objectives[1], 
+                "CO2_tx1_phase3": objectives[2], 
+                "CO2_tx1_phase4": objectives[3]})
     m.SetObjDirec("Min")
     m.MinFluxSolve()
     
@@ -253,14 +274,14 @@ for i in range(0, 2500):
         phase4sum["CO2_tx1_phase4_reverse"] = -phase4sum["CO2_tx1_phase4_reverse"]
         phase4sum = sum(phase4sum.values())
         
-        phloem1 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx1_phase1",IncZeroes=True)))
-        phloem1 = sum(phloem1.values())
-        phloem2 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx1_phase2",IncZeroes=True)))
-        phloem2 = sum(phloem2.values())
-        phloem3 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx1_phase3",IncZeroes=True)))
-        phloem3 = sum(phloem3.values())
-        phloem4 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx1_phase4",IncZeroes=True)))
-        phloem4 = sum(phloem4.values())
+#         phloem1 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx1_phase1",IncZeroes=True)))
+#         phloem1 = sum(phloem1.values())
+#         phloem2 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx1_phase2",IncZeroes=True)))
+#         phloem2 = sum(phloem2.values())
+#         phloem3 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx1_phase3",IncZeroes=True)))
+#         phloem3 = sum(phloem3.values())
+#         phloem4 = ast.literal_eval(str(m.GetSol(f = "Phloem_output_tx1_phase4",IncZeroes=True)))
+#         phloem4 = sum(phloem4.values())
         
     #     ox1 = ast.literal_eval(str(m.GetSol(f = "O2_tx1_phase1",IncZeroes=True)))
     #     ox1 = sum(ox1.values())
@@ -271,18 +292,18 @@ for i in range(0, 2500):
     #     ox4 = ast.literal_eval(str(m.GetSol(f = "O2_tx1_phase4",IncZeroes=True)))
     #     ox4 = sum(ox4.values())
         
-        sheet[0].write(i+1,0,m.GetObjective(IncZeroes=True)["phloem_biomass"])
+        sheet[0].write(i+1,0, i / 100)
         sheet[0].write(i+1,1,phloembiomasssum)
         sheet[0].write(i+1,2,phase1sum)
         sheet[0].write(i+1,3,phase2sum)
         sheet[0].write(i+1,4,phase3sum)
         sheet[0].write(i+1,5,phase4sum)
         sheet[0].write(i+1,6,m.GetObjVal())
-        sheet[0].write(i+1,7,phloem1)
-        sheet[0].write(i+1,8,phloem2)
-        sheet[0].write(i+1,9,phloem3)
-        sheet[0].write(i+1,10,phloem4)
-        sheet[0].write(i+1,11,phloem1 + phloem2 + phloem3 + phloem4)
+#         sheet[0].write(i+1,7,phloem1)
+#         sheet[0].write(i+1,8,phloem2)
+#         sheet[0].write(i+1,9,phloem3)
+#         sheet[0].write(i+1,10,phloem4)
+#         sheet[0].write(i+1,11,phloem1 + phloem2 + phloem3 + phloem4)
     #     sheet[0].write(i+1,12,ox1)
     #     sheet[0].write(i+1,13,ox2)
     #     sheet[0].write(i+1,14,ox3)
@@ -292,7 +313,7 @@ for i in range(0, 2500):
     print(i)
     print(m.GetStatusMsg())
 
-book.save("1111.xls")
+book.save("1242.xls")
 '''
 
 

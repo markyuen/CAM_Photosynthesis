@@ -1,2 +1,4 @@
 *.project
 *.pydevproject
+Extra Scans/
+__pycache__/
