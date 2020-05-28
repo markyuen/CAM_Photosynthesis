@@ -3,9 +3,9 @@ from xlwt import Workbook
 
 def write(m, CO2_obj, phloem_obj, filters):
     assert(len(CO2_obj) == 4)
-    assert(phloem_obj >= 0)
+    assert(phloem_obj <= 0)
     
-    m.SetObjective({"phloem_biomass": -phloem_obj})
+    m.SetObjective({"phloem_biomass": phloem_obj})
     m.SetObjDirec("Min")
     m.MinFluxSolve()
     df = modeling_phased.create_df_from_sol(m, filters)
@@ -19,7 +19,7 @@ def write(m, CO2_obj, phloem_obj, filters):
     
     ''' Populating first sheet '''
     sheets[0].write(0,0,"CO2 base weights: {}".format(CO2_obj))
-    sheets[0].write(1,0,"Phloem objective value: {}".format(-phloem_obj))
+    sheets[0].write(1,0,"Phloem objective value: {}".format(phloem_obj))
     sheets[0].write(2,0,"Iterations: {}".format(100))
     sheets[0].write(3,0,"Fixed photon flux: {}".format(m.GetSol(f='Photon_tx',IncZeroes=True)))
     sheets[0].write(4,0,"Fixed ATPase flux: {}".format(m.GetSol(f='ATPase_tx',IncZeroes=True)))
@@ -78,6 +78,6 @@ def write(m, CO2_obj, phloem_obj, filters):
         print(objectives)
         print(m.GetStatusMsg())
     
-    book.save("{}{}{}{}-{}.xls".format(CO2_obj[0], CO2_obj[1], CO2_obj[2], CO2_obj[3], phloem_obj))
+    book.save("{}{}{}{}-{}.xls".format(CO2_obj[0], CO2_obj[1], CO2_obj[2], CO2_obj[3], abs(phloem_obj)))
 
 
