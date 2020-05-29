@@ -1,17 +1,16 @@
 import scobra, csv
-from xlwt import Workbook
 import objective_scan, correlations, modeling_phased
 
 m = scobra.Model("../Final_Files/Constrained_Model_FINAL.json")
 
-# with open("../Final_Files/Reacs to Examine.csv") as csvfile:
-#     reader = csv.reader(csvfile)
-#     next(reader)
-#     reacs = [l[0] for l in reader]
-# csvfile.close()
-# objective_scan.write(m, [1,2,3,2], -1000, reacs)
+with open("../Final_Files/Reacs to Examine.csv") as csvfile:
+    reader = csv.reader(csvfile)
+    next(reader)
+    reacs = [l[0] for l in reader]
+csvfile.close()
+# objective_scan.write(m, [1,2,4,2], -1000, reacs)
 
-correlations.corr(m, [1,2,4,2], -3000, anchors=["CO2_tx", "RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p", "PEPCARBOX_RXN_c"])
+correlations.corr(m, [1,2,4,2], -1000, filtersp=reacs, anchors=["CO2_tx", "RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p", "PEPCARBOX_RXN_c"])
 
 # objectives = [1, 
 #               2, 

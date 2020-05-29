@@ -1,5 +1,6 @@
 import scobra, sys, modeling_phased
-from xlwt import Workbook
+import pandas as pd
+from xlsxwriter import Workbook
 
 def write(m, CO2_obj, phloem_obj, filters):
     assert(len(CO2_obj) == 4)
@@ -8,14 +9,14 @@ def write(m, CO2_obj, phloem_obj, filters):
     m.SetObjective({"phloem_biomass": phloem_obj})
     m.SetObjDirec("Min")
     m.MinFluxSolve()
-    df = modeling_phased.create_df_from_sol(m, filters)
+    df = modeling_phased.oneddf(m, filters)
     labels = [l for l in df.index.values]
     labelslen = len(labels)
     
-    book = Workbook()
+    book = Workbook("{}{}{}{}-{}-complete_scan.xlsx".format(CO2_obj[0], CO2_obj[1], CO2_obj[2], CO2_obj[3], abs(phloem_obj)))
     sheets = [0,1]
-    sheets[0] = book.add_sheet("Run Info")
-    sheets[1] = book.add_sheet("{}-{}-{}-{}".format(CO2_obj[0], CO2_obj[1], CO2_obj[2], CO2_obj[3]))
+    sheets[0] = book.add_worksheet("Run Info")
+    sheets[1] = book.add_worksheet("{}-{}-{}-{}".format(CO2_obj[0], CO2_obj[1], CO2_obj[2], CO2_obj[3]))
     
     ''' Populating first sheet '''
     sheets[0].write(0,0,"CO2 base weights: {}".format(CO2_obj))
@@ -28,7 +29,7 @@ def write(m, CO2_obj, phloem_obj, filters):
     
     ''' Populating second sheet '''
     first_column_names = ["CO2 Weight Multiplier", "phloem_biomass", "CO2_tx1", "CO2_tx2", "CO2_tx3", "CO2_tx4", "ObjVal"]
-    column_names = first_column_names + labels
+    column_names = first_column_names + [l.replace("1_phase", "") for l in labels]
     for j in range(len(column_names)):
         sheets[1].write(0,j,column_names[j])
     
@@ -68,16 +69,15 @@ def write(m, CO2_obj, phloem_obj, filters):
             sheets[1].write(i+1,5,phase4sum)
             sheets[1].write(i+1,6,m.GetObjVal())
             
-            df = modeling_phased.create_df_from_sol(m, filters)
-            fluxes = {l: df.loc[l].tolist() for l in labels}
+            df = modeling_phased.oneddf(m, filters)
             for j in range(labelslen):
-                flux = [round(f, 5) for f in fluxes[labels[j]]]
-                sheets[1].write(i+1,j+7,str(flux))
+                flux = round(df.loc[labels[j], "Flux"], 5)
+                sheets[1].write(i+1,j+7,flux)
             
         print(i)
         print(objectives)
         print(m.GetStatusMsg())
     
-    book.save("{}{}{}{}-{}.xls".format(CO2_obj[0], CO2_obj[1], CO2_obj[2], CO2_obj[3], abs(phloem_obj)))
+    book.close()
 
 

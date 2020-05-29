@@ -11,16 +11,16 @@ pd.set_option('display.max_rows', None)  # or 1000
 pd.set_option('display.max_colwidth', None)  # or 199
 pd.set_option('display.width', 1000)
 
-def create_df_from_sol(m, filters):
+def oneddf(m, filters):
     rtp = []
     for f in filters:
         for x in [r.id for r in m.reactions if f in r.id]:
             rtp.append(x)
-    
     sol = m.GetSol(IncZeroes = True, AsMtx = True, reacs = rtp)
     df = pd.DataFrame(sol)
     
-    if "CO2_tx1_phase1" and "CO2_tx1_phase2" and "CO2_tx1_phase3" and "CO2_tx1_phase4" and "CO2_tx1_phase1_reverse" and "CO2_tx1_phase2_reverse" and "CO2_tx1_phase3_reverse" and "CO2_tx1_phase4_reverse" in rtp:
+    if "CO2_tx1_phase1" and "CO2_tx1_phase2" and "CO2_tx1_phase3" and "CO2_tx1_phase4" and "CO2_tx1_phase1_reverse" and \
+    "CO2_tx1_phase2_reverse" and "CO2_tx1_phase3_reverse" and "CO2_tx1_phase4_reverse" in rtp:
         CO2_phase1 = df.loc["CO2_tx1_phase1", "Flux"] - df.loc["CO2_tx1_phase1_reverse", "Flux"]
         CO2_phase2 = df.loc["CO2_tx1_phase2", "Flux"] - df.loc["CO2_tx1_phase2_reverse", "Flux"]
         CO2_phase3 = df.loc["CO2_tx1_phase3", "Flux"] - df.loc["CO2_tx1_phase3_reverse", "Flux"]
@@ -33,6 +33,11 @@ def create_df_from_sol(m, filters):
                  "CO2_tx1_phase1_reverse", "CO2_tx1_phase2_reverse", "CO2_tx1_phase3_reverse", "CO2_tx1_phase4_reverse"])
         
         df = df.append(CO2_combined, verify_integrity = True)
+    
+    return df
+
+def create_df_from_sol(m, filters):
+    df = oneddf(m, filters)
     
     #Changes matrix from Phased Reaction x Flux to be Phased Flux x Reaction
     count = 0
