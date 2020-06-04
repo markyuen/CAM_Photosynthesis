@@ -3,8 +3,6 @@ from xlwt import Workbook
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import ast
-import csv
 
 pd.set_option('display.max_columns', None)  # or 1000
 pd.set_option('display.max_rows', None)  # or 1000

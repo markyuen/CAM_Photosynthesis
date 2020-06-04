@@ -3,9 +3,11 @@ import pandas as pd
 from scipy.stats import pearsonr
 from xlsxwriter import Workbook
 
-def corr(m, CO2_obj, phloem_obj, filtersp, anchors=["CO2_tx"], filtersc=["link", "phase"], sig=0.05):
+def corr(m, CO2_obj, phloem_obj, filtersp, lo=0, step=0.01, iters=100, anchors=["CO2_tx"], filtersc=["link", "phase", "phloem_biomass"], tol=0.99):
     assert(len(CO2_obj) == 4)
     assert(phloem_obj <= 0)
+    assert(iters > 0)
+    assert(tol >= 0)
     
     m.SetObjective({"phloem_biomass": phloem_obj})
     m.SetObjDirec("Min")
@@ -22,6 +24,7 @@ def corr(m, CO2_obj, phloem_obj, filtersp, anchors=["CO2_tx"], filtersc=["link",
     labelsc = [l for l in dfc.index.values]
     labelslenc = len(labelsc)
     vectors = {l: [] for l in labelsc}
+    vectorsp = {l: [] for l in labelsc}
     
     subset = set(labelsp).issubset(labelsc)
     print("Is subset? {}".format(str(subset)))
@@ -35,7 +38,7 @@ def corr(m, CO2_obj, phloem_obj, filtersp, anchors=["CO2_tx"], filtersc=["link",
     ''' Populating info sheet '''
     sheets[0].write(0,0,"CO2 base weights: {}".format(CO2_obj))
     sheets[0].write(1,0,"Phloem objective value: {}".format(phloem_obj))
-    sheets[0].write(2,0,"Iterations: {}".format(100))
+    
     sheets[0].write(3,0,"Fixed photon flux: {}".format(m.GetSol(f='Photon_tx',IncZeroes=True)))
     sheets[0].write(4,0,"Fixed ATPase flux: {}".format(m.GetSol(f='ATPase_tx',IncZeroes=True)))
     sheets[0].write(5,0,"Fixed NADPH flux: {}".format(m.GetSol(f='NADPHoxc_tx',IncZeroes=True)))
@@ -49,16 +52,17 @@ def corr(m, CO2_obj, phloem_obj, filtersp, anchors=["CO2_tx"], filtersc=["link",
         sheets[1].write(j,0,row_names1[j])
     
     ''' Writing scans to sheet '''
-    prev = [0,0,0,0]
+    prev = [-1,-1,-1,-1]
     col = 1
     breakpoints = []
-    for i in range(0, 101):
-        objectives = [x * i / 100 for x in CO2_obj]
+    counter = 0
+    while prev != [0,0,0,0] and counter <= iters:
+        objectives = [x * (counter * step + lo) for x in CO2_obj]
         
-        m.SetObjective({'CO2_tx1_phase1': objectives[0], 
-                    'CO2_tx1_phase2': objectives[1], 
-                    "CO2_tx1_phase3": objectives[2], 
-                    "CO2_tx1_phase4": objectives[3]})
+        m.SetObjective({"CO2_tx1_phase1": objectives[0], 
+                        "CO2_tx1_phase2": objectives[1], 
+                        "CO2_tx1_phase3": objectives[2], 
+                        "CO2_tx1_phase4": objectives[3]})
         m.SetObjDirec("Min")
         m.MinFluxSolve()
         
@@ -70,19 +74,24 @@ def corr(m, CO2_obj, phloem_obj, filtersp, anchors=["CO2_tx"], filtersc=["link",
             CO2_tx = [dfc.loc["CO2_tx1_phase1", "Flux"], dfc.loc["CO2_tx1_phase2", "Flux"], 
                       dfc.loc["CO2_tx1_phase3", "Flux"], dfc.loc["CO2_tx1_phase4", "Flux"]]
             for j in range(4):
-                if CO2_tx[j] - prev[j] > 10e-8:
+                if abs(CO2_tx[j] - prev[j]) > 10e-8:
                     cont = True
             
-            ''' Only continue to update vectors and print if new breakpoint '''
+            ''' Always update vectors for correlations later '''
+            for j in range(labelslenc):
+                flux = round(dfc.loc[labelsc[j], "Flux"], 5)
+                vectors[labelsc[j]].append(flux)
+            
+            ''' Only continue to update vectorsp and print if new breakpoint '''
             if cont:
-                ''' Append to vectors for correlations later '''
+                ''' Append to vectorsp for printing correlations later '''
                 for j in range(labelslenc):
                     flux = round(dfc.loc[labelsc[j], "Flux"], 5)
-                    vectors[labelsc[j]].append(flux)
+                    vectorsp[labelsc[j]].append(flux)
                 
                 ''' Write scans to sheet '''
                 phloembiomass = m.GetSol(f = "phloem_biomass",IncZeroes=True)["phloem_biomass"]
-                sheets[1].write(0,col,i / 100)
+                sheets[1].write(0,col,counter * step + lo)
                 sheets[1].write(1,col,m.GetObjVal())
                 sheets[1].write(2,col,phloembiomass)
                 sheets[1].write(3,col,CO2_tx[0])
@@ -104,17 +113,26 @@ def corr(m, CO2_obj, phloem_obj, filtersp, anchors=["CO2_tx"], filtersc=["link",
                 ''' Update prev, col, and breakpoints '''
                 prev = CO2_tx
                 col = col + 1
-                breakpoints.append(i/100)
+                breakpoints.append(counter * step + lo)
         
-        print(i)
+        print(counter)
         print(objectives)
         print(m.GetStatusMsg())
+        counter = counter + 1
     
     ''' Expanding anchors to four phases '''
     phased = []
     for a in anchors:
-        for i in range(1, 5):
-            phased.append(a + "1_phase" + str(i))
+        if a == "phloem_biomass":
+            phased.append("phloem_biomass")
+        elif "link" in a:
+            phased.append(a + "1_2")
+            phased.append(a + "2_3")
+            phased.append(a + "3_4")
+            phased.append(a + "4_1")
+        else:
+            for i in range(1, 5):
+                phased.append(a + "1_phase" + str(i))
     
     ''' Calculating correlations for each anchor '''
     correlations = {}
@@ -124,12 +142,14 @@ def corr(m, CO2_obj, phloem_obj, filtersp, anchors=["CO2_tx"], filtersc=["link",
         for reac,flux in vectors.items():
             ''' Include self here '''
             if len(set(flux)) != 1:
-                correlation = pearsonr(anchor, flux)[1]
-                if correlation <= sig:
-                    c[reac.replace("1_phase", "")] = flux
+                correlation = abs(pearsonr(anchor, flux)[0])
+                if correlation >= tol:
+                    ''' To print the flux nicely '''
+                    c[reac.replace("1_phase", "")] = vectorsp[reac]
         ''' Clean reaction names here and above '''
         correlations[a.replace("1_phase", "")] = c
     
+    sheets[0].write(2,0,"Iterations: {}".format(counter))
     ''' Populating correlation sheet, must be done after iters to calculate breakpoints '''
     second_column_names = ["Anchor", "Correlated Flux"]
     column_names2 = second_column_names + breakpoints
