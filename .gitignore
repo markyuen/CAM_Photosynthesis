@@ -2,3 +2,4 @@
 *.pydevproject
 Extra Scans/
 __pycache__/
+*.Rhistory
