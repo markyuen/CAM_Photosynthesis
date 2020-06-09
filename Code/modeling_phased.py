@@ -143,7 +143,7 @@ def DisplaySolution(m, filters, flux_min=0):
             large_flux_dict[df.columns[i]] = total_flux
 
     print(df.T)
-    print("\n" + str(len(large_flux_dict)) + "/" + str(len(df.index)) + " Fluxes Greater Than " + str(flux_min) + ": ")
+    print("\n" + str(len(large_flux_dict)) + "/" + str(len(df.columns)) + " Fluxes Greater Than " + str(flux_min) + ": ")
     print(large_flux_dict)
 
 '''  For plotting  '''

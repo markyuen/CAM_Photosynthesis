@@ -96,7 +96,14 @@ def SplitReactions(reacs_to_split):
 
 SplitReactions(["CO2_tx1_phase1","CO2_tx1_phase2","CO2_tx1_phase3","CO2_tx1_phase4"])
 
-m.WriteModel("../Final_Files/Constrained_Model_FINAL.json")
+m.SetConstraint("CO2_tx1_phase2",0,0)
+m.SetConstraint("CO2_tx1_phase3",0,0)
+m.SetConstraint("CO2_tx1_phase4",0,0)
+m.SetConstraint("CO2_tx1_phase2_reverse",0,0)
+m.SetConstraint("CO2_tx1_phase3_reverse",0,0)
+m.SetConstraint("CO2_tx1_phase4_reverse",0,0)
+
+m.WriteModel("../Final_Files/Constrained_CAM_Model_FINAL.json")
 
 
 
