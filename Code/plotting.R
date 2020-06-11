@@ -19,24 +19,24 @@ plott <- function(x, y, pch, col, lwd=1.8, cex=0.8, lty=1) {
   points(x, y, pch=pch, col=col, type="l", lwd=lwd, lty=lty)
 }
 
-plot.reacs <- function(type="phase", reac_list=list("CO2_tx"), title=expression("CO"[2]*" Transfer Scan")) {
+plot.reacs <- function(type="phase", reac.list=c("CO2_tx"), title=expression("CO"[2]*" Transfer Scan")) {
   #Expand reaction name to four phases
   reacs <- c()
   if (type == "phloem") {
     reacs <- c(reacs, "phloem_biomass")
   } else if (type == "phase") {
-    for (i in 1:length(reac_list)) {
-      reacs <- c(reacs, paste(reac_list[[i]], "1", sep=""))
-      reacs <- c(reacs, paste(reac_list[[i]], "2", sep=""))
-      reacs <- c(reacs, paste(reac_list[[i]], "3", sep=""))
-      reacs <- c(reacs, paste(reac_list[[i]], "4", sep=""))
+    for (i in 1:length(reac.list)) {
+      reacs <- c(reacs, paste(reac.list[i], "1", sep=""))
+      reacs <- c(reacs, paste(reac.list[i], "2", sep=""))
+      reacs <- c(reacs, paste(reac.list[i], "3", sep=""))
+      reacs <- c(reacs, paste(reac.list[i], "4", sep=""))
     }
   } else if (type == "link") {
-    for (i in 1:length(reac_list)) {
-      reacs <- c(reacs, paste(reac_list[[i]], "1_2", sep=""))
-      reacs <- c(reacs, paste(reac_list[[i]], "2_3", sep=""))
-      reacs <- c(reacs, paste(reac_list[[i]], "3_4", sep=""))
-      reacs <- c(reacs, paste(reac_list[[i]], "4_1", sep=""))
+    for (i in 1:length(reac.list)) {
+      reacs <- c(reacs, paste(reac.list[i], "1_2", sep=""))
+      reacs <- c(reacs, paste(reac.list[i], "2_3", sep=""))
+      reacs <- c(reacs, paste(reac.list[i], "3_4", sep=""))
+      reacs <- c(reacs, paste(reac.list[i], "4_1", sep=""))
     }
   } else {
     stop("Invalid type.")
@@ -88,6 +88,8 @@ plot.reacs <- function(type="phase", reac_list=list("CO2_tx"), title=expression(
     all <- c(all, full_vectors[[i]][[1]], full_vectors[[i]][[2]])
   }
   yat <- pretty(all)
+  gap <- yat[length(yat)] - yat[length(yat) - 1]
+  yat <- c(yat, yat[length(yat)] + gap)
   xgap <- c(mult1, mult2)
   xat <- pretty(xgap)
   xlab <- ifelse(xat > 0.55, xat + 1.45, xat)
@@ -110,7 +112,7 @@ plot.reacs <- function(type="phase", reac_list=list("CO2_tx"), title=expression(
   #Initialize plot
   plot(0, xaxt="n", yaxt="n", ylim=range(yat), xlim=range(xgap), 
        main=title, xlab="Water Stress Coefficient", 
-       ylab=expression("Solution Flux (mol/m"^2*")"))
+       ylab=expression("Solution Flux (mol/m"^2*")"), cex.lab=0.9)
   
   #Plot the dashed portion
   last <- length(full_vectors[[1]][[1]])
@@ -131,7 +133,9 @@ plot.reacs <- function(type="phase", reac_list=list("CO2_tx"), title=expression(
   abline(v=0.615, lty=2) #CAM
   
   #Writing
-  text(c(0.08, 0.47), c(-0.19), cex=0.8, labels=c(expression("C"[3]), "CAM"))
+  if ("CO2_tx" %in% reac.list) {
+    text(c(0.08, 0.47), c(-0.19), cex=0.8, labels=c(expression("C"[3]), "CAM"))
+  }
   
   #Set the axes ticks and labels, and add legend
   axis(1, at=xat, labels=xlab)
@@ -145,4 +149,7 @@ plot.reacs <- function(type="phase", reac_list=list("CO2_tx"), title=expression(
   dev.off()
 }
 
-
+plot.reacs()
+plot.reacs(type="phloem", reac.list = c("phloem_biomass"),title="Phloem Biomass Scan")
+plot.reacs(type="link", reac.list = c("Malate_link"),title="Malate Link Scan")
+plot.reacs(type="link", reac.list = c("Starch_link"),title="Starch Link Scan")
