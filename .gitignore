@@ -3,3 +3,4 @@
 Extra Scans/
 __pycache__/
 *.Rhistory
+*.RData
