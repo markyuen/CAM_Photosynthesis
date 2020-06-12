@@ -12,10 +12,10 @@ m = scobra.Model("../Final_Files/Constrained_Model_FINAL.json")
 # anchors=["CO2_tx", "RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p", "PEPCARBOX_RXN_c", "phloem_biomass", "Starch_link", "Malate_link"]
 # correlations.corr(m, [1,2,2,2], -1000, filtersp=reacs, anchors=anchors, lo=0, step=0.01, iters=300, tol=0.99)
 
-objectives = [5, 
-              10, 
-              20, 
-              10, 
+objectives = [2000000, 
+              4000000, 
+              8000000, 
+              4000000, 
               -1000]
     
 m.SetObjective({"CO2_tx1_phase1": objectives[0], 
