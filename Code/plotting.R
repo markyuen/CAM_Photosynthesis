@@ -113,8 +113,8 @@ plot.reacs <- function(weight, type="phase", reac.list=c("CO2_tx"),
   xlab <- ifelse(xat > fb + 0.01, xat + minus, xat)
   
   #PLOTTING
-  filename <- gsub("\\* ", "", gsub("\"", "", toString(title)))
-  png(file=paste(filename, "_", weight, ".png", sep=""), width=5000, height=2500, res=600)
+  filename <- gsub("\\)", "", gsub(" \\(", "_", gsub(":", "", gsub("\\* ", "", gsub("\"", "", toString(title))))))
+  png(file=paste(filename, ".png", sep=""), width=5000, height=2500, res=600)
   
   #Set font and colors
   windowsFonts(TNR=windowsFont("Times New Roman"))

@@ -3,7 +3,7 @@ source("plotting.R")
 weight <- "1242"
 df <- import.scan(weight)
 
-plot.reacs(weight)
+plot.reacs(weight, title=expression("CO"[2]*" Transfer Scan (Objective Ratio: 1:2:4:2)"))
 plot.reacs(weight, type="phloem", reac.list = c("phloem_biomass"),title="Phloem Biomass Scan")
 plot.reacs(weight, type="link", reac.list = c("Malate_link"),title="Malate Link Scan")
 plot.reacs(weight, type="link", reac.list = c("Starch_link"),title="Starch Link Scan")
