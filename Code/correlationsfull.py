@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.stats import pearsonr
 from xlsxwriter import Workbook
 
-def corr(m, CO2_obj, phloem_obj, filtersp, lo=0, step=0.01, iters=100, anchors=["CO2_tx"], filtersc=["link", "phase", "phloem_biomass"], tol=0.99):
+def corrfull(m, CO2_obj, phloem_obj, filtersp, lo=0, step=0.01, iters=100, anchors=["CO2_tx"], filtersc=["link", "phase", "phloem_biomass"], tol=0.99):
     assert(len(CO2_obj) == 4)
     assert(phloem_obj <= 0)
     assert(iters > 0)
@@ -29,7 +29,7 @@ def corr(m, CO2_obj, phloem_obj, filtersp, lo=0, step=0.01, iters=100, anchors=[
     subset = set(labelsp).issubset(labelsc)
     print("Is subset? {}".format(str(subset)))
     
-    book = Workbook("{}{}{}{}-{}-corr.xlsx".format(CO2_obj[0], CO2_obj[1], CO2_obj[2], CO2_obj[3], abs(phloem_obj)))
+    book = Workbook("{}{}{}{}-{}-corrfull.xlsx".format(CO2_obj[0], CO2_obj[1], CO2_obj[2], CO2_obj[3], abs(phloem_obj)))
     sheets = [0,1,2]
     sheets[0] = book.add_worksheet("Run Info")
     sheets[1] = book.add_worksheet("{}-{}-{}-{} Scan".format(CO2_obj[0], CO2_obj[1], CO2_obj[2], CO2_obj[3]))
@@ -70,13 +70,13 @@ def corr(m, CO2_obj, phloem_obj, filtersp, lo=0, step=0.01, iters=100, anchors=[
         if m.GetStatusMsg() == "no solution":
             sys.stderr.write("ERROR")
         else:
-            cont = False
+#             cont = False
             dfc = modeling_phased.oneddf(m, filtersc)
             CO2_tx = [dfc.loc["CO2_tx1_phase1", "Flux"], dfc.loc["CO2_tx1_phase2", "Flux"], 
                       dfc.loc["CO2_tx1_phase3", "Flux"], dfc.loc["CO2_tx1_phase4", "Flux"]]
-            for j in range(4):
-                if abs(CO2_tx[j] - prev[j]) > 10e-8:
-                    cont = True
+#             for j in range(4):
+#                 if abs(CO2_tx[j] - prev[j]) > 10e-8:
+#                     cont = True
             
             ''' Always update vectors for correlations later '''
             for j in range(labelslenc):
@@ -84,7 +84,7 @@ def corr(m, CO2_obj, phloem_obj, filtersp, lo=0, step=0.01, iters=100, anchors=[
                 vectors[labelsc[j]].append(flux)
             
             ''' Only continue to update vectorsp and print if new breakpoint '''
-            if cont:
+            if True:
                 ''' Append to vectorsp for printing correlations later '''
                 for j in range(labelslenc):
                     flux = round(dfc.loc[labelsc[j], "Flux"], 5)
@@ -171,44 +171,6 @@ def corr(m, CO2_obj, phloem_obj, filtersp, lo=0, step=0.01, iters=100, anchors=[
     
     book.close()
     print("Book saved")
-
-# def corr(m, CO2_obj, phloem_obj, anchors=["CO2_tx"], sig=0.05, filters=["link", "phase"]):
-#     assert(len(CO2_obj) == 4)
-#     assert(phloem_obj <= 0)
-#     
-#     m.SetObjective({"phloem_biomass": phloem_obj})
-#     m.SetObjective({"CO2_tx1_phase1": CO2_obj[0], 
-#                     "CO2_tx1_phase2": CO2_obj[1], 
-#                     "CO2_tx1_phase3": CO2_obj[2], 
-#                     "CO2_tx1_phase4": CO2_obj[3]})
-#     m.SetObjDirec("Min")
-#     m.MinFluxSolve()
-#     print(m.GetStatusMsg())
-#     
-#     df = modeling_phased.create_df_from_sol(m, filters)
-#     labels = [l for l in df.index.values]
-#     fluxes = {l: df.loc[l].tolist() for l in labels}
-#     
-#     correlations = {}
-#     for a in anchors:
-#         anchor = fluxes[a]
-#         c = {}
-#         for reac,flux in fluxes.items():
-#             if len(set(flux)) != 1 and reac != a:
-#                 correlation = pearsonr(anchor, flux)[1]
-#                 if correlation <= sig:
-#                     c[reac] = flux
-#         correlations[a] = (anchor, c)
-#     
-#     for anchor,tuple in correlations.items():
-#         flux = [round(f, 5) for f in tuple[0]]
-#         print("\n{}: {}".format(anchor, flux))
-#         for reac,flux in tuple[1].items():
-#             flux = [round(f, 5) for f in flux]
-#             print("\t{}: {}".format(reac, flux))
-#     
-#     return correlations
-
 
 
 

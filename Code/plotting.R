@@ -140,13 +140,15 @@ plot.reacs <- function(weight, type="phase", reac.list=c("CO2_tx"),
     text(c(0.08, 0.24, 0.47, 0.67), c(yat[1]), cex=0.8, 
          labels=c(expression("C"[3]), expression("C"[3]*"-CAM Transition"), "CAM", "CAM Idling"))
   } else if (weight == "1222") {
+    rectst <- c(rects[1], rects[3], rects[4])
     rect(xleft=c(-1,0.505,0.615), xright=c(0.505,0.615,10), ybottom=c(-10), ytop=c(10), 
-         col=rects, border=NA)
+         col=rectst, border=NA)
     text(c(0.25, 0.56, 0.67), c(yat[1]), cex=0.8, 
          labels=c(expression("C"[3]), "CAM", "CAM Idling"))
   } else if (weight == "1111") {
+    rectst <- c(rects[1], rects[4])
     rect(xleft=c(-1,0.815), xright=c(0.815,10), ybottom=c(-10), ytop=c(10), 
-         col=rects, border=NA)
+         col=rectst, border=NA)
     text(c(0.4, 0.87), c(yat[1]), cex=0.8, 
          labels=c(expression("C"[3]), "CAM Idling"))
   }
