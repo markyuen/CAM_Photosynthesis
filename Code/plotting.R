@@ -20,7 +20,7 @@ plot.pl <- function(x, y, pch, col, lwd=1.8, cex=0.8, lty=1) {
   points(x, y, pch=pch, col=col, type="l", lwd=lwd, lty=lty)
 }
 
-plot.reacs <- function(weight, type="phase", reac.list=c("CO2_tx"), 
+plot.reacs <- function(weight, df, type="phase", reac.list=c("CO2_tx"), 
                        title=expression("CO"[2]*" Transfer Scan")) {
   #Grab breakpoints
   top <- df[1,]
