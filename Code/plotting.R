@@ -3,7 +3,7 @@ library("plotrix")
 library("RColorBrewer")
 
 import.scan <- function(weight) {
-  path <- paste("../Final_Files/", weight, "-1000-corr.xlsx", sep="")
+  path <- paste("../Final_Files/", weight, "-1000-corrfull.xlsx", sep="")
   df <- data.frame(read_excel(path, sheet=2, col_names=FALSE))
   #Remove extra CO2_tx and set row index as reac name
   rows <- dim(df)[1]

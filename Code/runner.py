@@ -11,7 +11,7 @@ m = scobra.Model("../Final_Files/Constrained_Model_FINAL_v1.json")
 # csvfile.close()
 
 anchors=["CO2_tx", "RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p", "PEPCARBOX_RXN_c", "phloem_biomass", "Starch_link", "Malate_link"]
-correlationsfull.corrfull(m, [1,2,4,2], -1000, filtersp=["link","phase"], anchors=anchors, lo=0, step=0.01, iters=300, tol=0.9)
+correlationsfull.corrfull(m, [1,2,2,2], -1000, filtersp=["link","phase"], anchors=anchors, lo=0, step=0.01, iters=300, tol=0.9)
 # 
 # objectives = [1, 
 #               2, 

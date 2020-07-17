@@ -57,7 +57,7 @@ newm.AddReaction("Proton_v_link4_1",{"PROTON_v1_phase4":-1, "PROTON_v2_phase1":1
 '''  diel_biomass reaction  '''
 newm.AddReaction('phloem_biomass',{'X_Phloem_contribution_t1_t_phase1':-12,'X_Phloem_contribution_t1_t_phase2':-3, "X_Phloem_contribution_t1_t_phase3":-24, "X_Phloem_contribution_t1_t_phase4":-9})
 
-#newm.WriteModel("Phased_Model_FINAL_v1.xls")
+newm.WriteModel("Phased_Model_FINAL_v1.xls")
 
 #Test if model works
 newm.SetConstraints({'Phloem_output_tx1_phase1':(1,1000),'Phloem_output_tx1_phase2':(1,1000), 'Phloem_output_tx1_phase3':(1,1000), 'Phloem_output_tx1_phase4':(1,1000)})
