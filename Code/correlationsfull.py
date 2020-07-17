@@ -137,25 +137,34 @@ def corrfull(m, CO2_obj, phloem_obj, filtersp, lo=0, step=0.01, iters=100, ancho
     
     ''' Calculating correlations for each anchor '''
     correlations = {}
+    coef = []
     for a in phased:
         anchor = vectors[a]
         c = {}
         for reac,flux in vectors.items():
             ''' Include self here '''
             if len(set(flux)) != 1:
-                correlation = abs(pearsonr(anchor, flux)[0])
-                if correlation >= tol:
+                corrcoef = pearsonr(anchor, flux)[0]
+                abscoef = abs(corrcoef)
+                if abscoef >= tol:
                     ''' To print the flux nicely '''
                     c[reac.replace("1_phase", "")] = vectorsp[reac]
+                    ''' Add to Corr Coef column '''
+                    coef.append(corrcoef)
         ''' Clean reaction names here and above '''
         correlations[a.replace("1_phase", "")] = c
     
     sheets[0].write(2,0,"Iterations: {}".format(counter))
     ''' Populating correlation sheet, must be done after iters to calculate breakpoints '''
-    second_column_names = ["Anchor", "Correlated Flux"]
+    second_column_names = ["Anchor", "Correlated Flux", "Corr Coef", "Abs"]
     column_names2 = second_column_names + breakpoints
     for j in range(len(column_names2)):
         sheets[2].write(0,j,column_names2[j])
+    
+    ''' Populating Corr Coef columns '''
+    for j in range(len(coef)):
+        sheets[2].write(j+1,2,coef[j])
+        sheets[2].write(j+1,3,abs(coef[j]))
     
     ''' Writing correlations to sheet '''
     breakpointslen = len(breakpoints)
@@ -166,7 +175,7 @@ def corrfull(m, CO2_obj, phloem_obj, filtersp, lo=0, step=0.01, iters=100, ancho
             sheets[2].write(row,0,anchor)
             sheets[2].write(row,1,reac)
             for i in range(breakpointslen):
-                sheets[2].write(row,i+2,flux[i])
+                sheets[2].write(row,i+4,flux[i])
             row = row + 1
     
     book.close()

@@ -2,7 +2,7 @@ import scobra
 from cobra import Reaction
 from six import iteritems
 
-m = scobra.Model("../Final_Files/Phased_Model_FINAL.xls")
+m = scobra.Model("Phased_Model_FINAL_v1.xls")
 
 m.SetReacsFixedRatio({"RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p1_phase1":3, "RXN_961_p1_phase1":1})
 m.SetReacsFixedRatio({"RIBULOSE_BISPHOSPHATE_CARBOXYLASE_RXN_p1_phase2":3, "RXN_961_p1_phase2":1})
@@ -96,14 +96,28 @@ def SplitReactions(reacs_to_split):
 
 SplitReactions(["CO2_tx1_phase1","CO2_tx1_phase2","CO2_tx1_phase3","CO2_tx1_phase4"])
 
-m.SetConstraint("CO2_tx1_phase2",0,0)
-m.SetConstraint("CO2_tx1_phase3",0,0)
-m.SetConstraint("CO2_tx1_phase4",0,0)
-m.SetConstraint("CO2_tx1_phase2_reverse",0,0)
-m.SetConstraint("CO2_tx1_phase3_reverse",0,0)
-m.SetConstraint("CO2_tx1_phase4_reverse",0,0)
+# m.SetConstraint("CO2_tx1_phase2",0,0)
+# m.SetConstraint("CO2_tx1_phase3",0,0)
+# m.SetConstraint("CO2_tx1_phase4",0,0)
+# m.SetConstraint("CO2_tx1_phase2_reverse",0,0)
+# m.SetConstraint("CO2_tx1_phase3_reverse",0,0)
+# m.SetConstraint("CO2_tx1_phase4_reverse",0,0)
 
-m.WriteModel("../Final_Files/Constrained_CAM_Model_FINAL.json")
+reactions = m.Reactions()
+
+for reac in reactions:
+    lb = m.GetReaction(reac).lower_bound
+    ub = m.GetReaction(reac).upper_bound
+    if lb == float("-inf"):
+        lb = -1000.0
+    if ub == float("inf"):
+        ub = 1000.0
+    m.SetConstraint(reac, lb, ub)
+# print(m.GetReaction(reactions[0]))
+# print(m.GetReaction(reactions[0]).upper_bound == float("inf"))
+# print(type(m.GetReaction(reactions[0]).upper_bound))
+
+m.WriteModel("Constrained_Model_FINAL_v1.json")
 
 
 
